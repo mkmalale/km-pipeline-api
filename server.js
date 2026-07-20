@@ -12,6 +12,7 @@ const { Pool }   = require("pg");
 const cors       = require("cors");
 const helmet     = require("helmet");
 const rateLimit  = require("express-rate-limit");
+const crypto     = require("crypto");
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,41 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
+
+// ── PIN HASHING ───────────────────────────────────────────────────
+const PIN_PEPPER = process.env.PIN_PEPPER || "km-malale-pepper-2230";
+function hashPin(pin) {
+  return crypto.createHash("sha256").update(String(pin) + PIN_PEPPER).digest("hex");
+}
+
+// ── ENSURE users TABLE + SEED DEFAULTS ────────────────────────────
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id         BIGSERIAL PRIMARY KEY,
+        name       TEXT NOT NULL,
+        role       TEXT NOT NULL DEFAULT 'clerk' CHECK (role IN ('attorney','clerk')),
+        pin_hash   TEXT NOT NULL,
+        initials   TEXT,
+        color      TEXT DEFAULT '#378ADD',
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_pin ON users(pin_hash);
+    `);
+    const { rows } = await pool.query("SELECT COUNT(*)::int AS c FROM users");
+    if (rows[0].c === 0) {
+      await pool.query(
+        `INSERT INTO users (name, role, pin_hash, initials, color) VALUES
+         ($1,'attorney',$2,'KM','#9A7B4F'),
+         ($3,'clerk',$4,'CL','#378ADD')`,
+        ["Khongelani Malale", hashPin("2230"), "Clerk", hashPin("1234")]
+      );
+      console.log("Seeded default users.");
+    }
+  } catch (e) { console.error("users table init:", e.message); }
+})();
 
 // ── MIDDLEWARE ────────────────────────────────────────────────────
 app.use(helmet());
@@ -53,6 +89,109 @@ function auth(req, res, next) {
 
 // ── HEALTH ────────────────────────────────────────────────────────
 app.get("/health", (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
+
+// ══════════════════════════════════════════════════════════════════
+//  USERS & AUTH  (attorney-managed)
+// ══════════════════════════════════════════════════════════════════
+
+// helper: derive initials from a name
+function initialsOf(name){
+  const p = String(name).trim().split(/\s+/);
+  return ((p[0]?.[0]||"") + (p[1]?.[0]||"")).toUpperCase() || "U";
+}
+const USER_COLORS = ["#9A7B4F","#378ADD","#1D9E75","#BA7517","#534AB7","#993C1D","#639922"];
+
+// POST /api/auth/login {pin} — server-side PIN check, never ships PINs to client
+app.post("/api/auth/login", auth, async (req, res) => {
+  try {
+    const pin = (req.body && req.body.pin) || "";
+    if (!/^\d{4}$/.test(pin)) return res.status(400).json({ error: "PIN must be 4 digits" });
+    const { rows } = await pool.query(
+      "SELECT id, name, role, initials, color FROM users WHERE pin_hash = $1 LIMIT 1",
+      [hashPin(pin)]
+    );
+    if (!rows.length) return res.status(401).json({ error: "Invalid PIN" });
+    res.json({ data: rows[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/users — list (never returns PINs)
+app.get("/api/users", auth, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT id, name, role, initials, color, created_at FROM users ORDER BY role DESC, name ASC"
+    );
+    res.json({ data: rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/users — create {name, role, pin, color?}
+app.post("/api/users", auth, async (req, res) => {
+  try {
+    const d = req.body || {};
+    if (!d.name || !/^\d{4}$/.test(d.pin || "")) return res.status(400).json({ error: "Name and a 4-digit PIN are required" });
+    const role = d.role === "attorney" ? "attorney" : "clerk";
+    // reject duplicate PIN
+    const dup = await pool.query("SELECT 1 FROM users WHERE pin_hash = $1", [hashPin(d.pin)]);
+    if (dup.rows.length) return res.status(409).json({ error: "That PIN is already in use" });
+    const color = d.color || USER_COLORS[Math.floor(Math.random()*USER_COLORS.length)];
+    const { rows } = await pool.query(
+      `INSERT INTO users (name, role, pin_hash, initials, color)
+       VALUES ($1,$2,$3,$4,$5) RETURNING id, name, role, initials, color`,
+      [d.name.trim(), role, hashPin(d.pin), initialsOf(d.name), color]
+    );
+    res.status(201).json({ data: rows[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// PATCH /api/users/:id — update {name?, role?, pin?, color?}
+app.patch("/api/users/:id", auth, async (req, res) => {
+  try {
+    const d = req.body || {};
+    const id = req.params.id;
+    const cur = await pool.query("SELECT * FROM users WHERE id = $1", [id]);
+    if (!cur.rows.length) return res.status(404).json({ error: "User not found" });
+
+    // guard: never leave zero attorneys
+    if (d.role && d.role !== "attorney" && cur.rows[0].role === "attorney") {
+      const att = await pool.query("SELECT COUNT(*)::int AS c FROM users WHERE role='attorney'");
+      if (att.rows[0].c <= 1) return res.status(400).json({ error: "At least one attorney must remain" });
+    }
+    const sets = [], params = [];
+    if (d.name)  { params.push(d.name.trim()); sets.push(`name = $${params.length}`);
+                   params.push(initialsOf(d.name)); sets.push(`initials = $${params.length}`); }
+    if (d.role)  { params.push(d.role === "attorney" ? "attorney" : "clerk"); sets.push(`role = $${params.length}`); }
+    if (d.color) { params.push(d.color); sets.push(`color = $${params.length}`); }
+    if (d.pin)   {
+      if (!/^\d{4}$/.test(d.pin)) return res.status(400).json({ error: "PIN must be 4 digits" });
+      const dup = await pool.query("SELECT 1 FROM users WHERE pin_hash = $1 AND id <> $2", [hashPin(d.pin), id]);
+      if (dup.rows.length) return res.status(409).json({ error: "That PIN is already in use" });
+      params.push(hashPin(d.pin)); sets.push(`pin_hash = $${params.length}`);
+    }
+    if (!sets.length) return res.status(400).json({ error: "Nothing to update" });
+    sets.push("updated_at = NOW()");
+    params.push(id);
+    const { rows } = await pool.query(
+      `UPDATE users SET ${sets.join(", ")} WHERE id = $${params.length}
+       RETURNING id, name, role, initials, color`, params
+    );
+    res.json({ data: rows[0] });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DELETE /api/users/:id — cannot remove the last attorney
+app.delete("/api/users/:id", auth, async (req, res) => {
+  try {
+    const cur = await pool.query("SELECT role FROM users WHERE id = $1", [req.params.id]);
+    if (!cur.rows.length) return res.status(404).json({ error: "User not found" });
+    if (cur.rows[0].role === "attorney") {
+      const att = await pool.query("SELECT COUNT(*)::int AS c FROM users WHERE role='attorney'");
+      if (att.rows[0].c <= 1) return res.status(400).json({ error: "Cannot delete the last attorney" });
+    }
+    await pool.query("DELETE FROM users WHERE id = $1", [req.params.id]);
+    res.json({ deleted: req.params.id });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
 
 // ══════════════════════════════════════════════════════════════════
 //  MATTERS
@@ -133,6 +272,18 @@ app.post("/api/matters", auth, async (req, res) => {
         `INSERT INTO notes (matter_id, text, author) VALUES ($1, $2, 'System')`,
         [id, "Inquiry received via website booking form. WhatsApp sent to attorney."]
       );
+      const m = rows[0];
+      const urgent = (m.urgency||"").toLowerCase().includes("urgent");
+      sendEmail(
+        `${urgent?"🔴 URGENT — ":""}New inquiry — ${m.first_name} ${m.last_name||""}`,
+        `<div style="font-family:sans-serif">
+          <h2 style="color:#9A7B4F">New Client Inquiry</h2>
+          <p><strong>${m.first_name} ${m.last_name||""}</strong> (${m.ref})</p>
+          <p>Matter: ${m.matter_type||"—"}<br>Phone: ${m.phone||"—"}<br>Email: ${m.email||"—"}<br>Urgency: ${m.urgency||"—"}</p>
+          <p>${m.summary||""}</p>
+          <p style="color:#888;font-size:12px">Received ${new Date().toLocaleString("en-ZA")}</p>
+        </div>`
+      );
     }
     res.status(201).json({ data: { ...rows[0], notes: [] } });
   } catch (e) { res.status(500).json({ error: e.message }); }
@@ -165,6 +316,19 @@ app.patch("/api/matters/:id", auth, async (req, res) => {
       params
     );
     if (!rows.length) return res.status(404).json({ error: "Not found" });
+    // Email notification on stage change
+    if (Object.keys(d).map(k=>k.replace(/([A-Z])/g,"_$1").toLowerCase()).includes("stage")) {
+      const m = rows[0];
+      sendEmail(
+        `Matter status changed — ${m.first_name} ${m.last_name||""}`,
+        `<div style="font-family:sans-serif">
+          <h2 style="color:#9A7B4F">K Malale Attorneys — Pipeline Update</h2>
+          <p><strong>${m.first_name} ${m.last_name||""}</strong> (${m.ref}) moved to stage: <strong>${m.stage}</strong></p>
+          <p>Matter type: ${m.matter_type||"—"}<br>Phone: ${m.phone||"—"}<br>Urgency: ${m.urgency||"—"}</p>
+          <p style="color:#888;font-size:12px">Logged ${new Date().toLocaleString("en-ZA")}</p>
+        </div>`
+      );
+    }
     res.json({ data: rows[0] });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

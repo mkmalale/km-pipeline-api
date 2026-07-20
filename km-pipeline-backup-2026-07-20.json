@@ -1,0 +1,749 @@
+{
+  "generated": "2026-07-20T08:59:06.303Z",
+  "firm": "K Malale Attorneys Inc",
+  "api_base": "https://km-pipeline-api.vercel.app",
+  "matters": [
+    {
+      "id": "KM-DI4UL6",
+      "ref": "KM-P9X88V",
+      "firstName": "RENEILWE",
+      "lastName": "TAU",
+      "phone": "065 741 1712",
+      "email": null,
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T12:47:33.375Z",
+      "createdAt": "2026-07-09T12:47:33.375Z",
+      "updatedAt": "2026-07-09T12:47:33.375Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DH8BRK",
+      "ref": "KM-PNFUML",
+      "firstName": "MMAMOYA MERCY",
+      "lastName": "LETLOJANE",
+      "phone": "073 459 8185",
+      "email": null,
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T12:22:15.439Z",
+      "createdAt": "2026-07-09T12:22:15.439Z",
+      "updatedAt": "2026-07-09T12:22:15.439Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DH63WW",
+      "ref": "KM-VQU6AK",
+      "firstName": "DOLLY",
+      "lastName": "MASWANGANYI",
+      "phone": "077 444 9596",
+      "email": null,
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T12:20:32.348Z",
+      "createdAt": "2026-07-09T12:20:32.348Z",
+      "updatedAt": "2026-07-09T12:20:32.348Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DEZA14",
+      "ref": "KM-F2SVNH",
+      "firstName": "AGNES",
+      "lastName": "JOSEPH",
+      "phone": "0867 821 8390",
+      "email": null,
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T11:19:14.970Z",
+      "createdAt": "2026-07-09T11:19:14.970Z",
+      "updatedAt": "2026-07-09T11:19:14.970Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DE4EVQ",
+      "ref": "KM-FZONFP",
+      "firstName": "VIRGINIA",
+      "lastName": "MALATSA",
+      "phone": "073 530 1883\\071 708 5107",
+      "email": "Malatsivirginia3@gmail.com",
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T10:55:14.455Z",
+      "createdAt": "2026-07-09T10:55:14.455Z",
+      "updatedAt": "2026-07-09T10:55:14.455Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DDP35E",
+      "ref": "KM-Z20SKQ",
+      "firstName": "STEPHEN MACHEPE",
+      "lastName": "MAKWELA",
+      "phone": "063 981 7673",
+      "email": null,
+      "town": null,
+      "matterType": "Civil Litigation",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": "2026-02-13T00:00:00.000Z",
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T10:43:19.831Z",
+      "createdAt": "2026-07-09T10:43:19.831Z",
+      "updatedAt": "2026-07-09T10:43:19.831Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DDG8AB",
+      "ref": "KM-S88GHG",
+      "firstName": "ELIAS  NTSANE",
+      "lastName": "MAKUME",
+      "phone": "082 491 7947",
+      "email": null,
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T10:36:25.823Z",
+      "createdAt": "2026-07-09T10:36:25.823Z",
+      "updatedAt": "2026-07-09T10:36:25.823Z",
+      "notes": []
+    },
+    {
+      "id": "KM-DDG7GJ",
+      "ref": "KM-NF7Q7R",
+      "firstName": "ELIAS  NTSANE",
+      "lastName": "MAKUME",
+      "phone": "082 491 7947",
+      "email": null,
+      "town": null,
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": null,
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": null,
+      "stage": "inquiry",
+      "stageAt": "2026-07-09T10:43:54.204Z",
+      "createdAt": "2026-07-09T10:36:25.558Z",
+      "updatedAt": "2026-07-09T10:36:25.558Z",
+      "notes": []
+    },
+    {
+      "id": "KM-3CV8SV",
+      "ref": "KM-QH5ZTL",
+      "firstName": "Sonja",
+      "lastName": "Oberholster",
+      "phone": "0649894745",
+      "email": "sonjapieterse71@gmail.com",
+      "town": "Phalaborwa",
+      "matterType": "Civil Litigation",
+      "urgency": "🔴 Urgent — Within 24–48 hours",
+      "summary": "Good day, Mr. Nkonwana.\n\nI hope you are doing well. I'm from Phalaborwa.\n\nI would like to enquire about your fees for drafting an antenuptial contract (marriage contract) out of community of property without the accrual system.\n\nCould you please let me know how much you would charge and how long the process usually takes?\n\nThank you. I look forward to your response.\n\nGreetings Christo and Sonja.",
+      "consultType": "Virtual · WhatsApp / Video Call",
+      "preferredDate": "2026-07-03T00:00:00.000Z",
+      "timeSlot": "09:00–10:00",
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": "2026-07-03T00:00:00.000Z",
+      "stage": "closed",
+      "stageAt": "2026-07-04T04:22:55.585Z",
+      "createdAt": "2026-07-02T10:22:28.853Z",
+      "updatedAt": "2026-07-02T10:22:28.853Z",
+      "notes": [
+        {
+          "id": "6b926ec9-229b-4c4d-96a2-959466c626c8",
+          "text": "Inquiry received via website booking form. WhatsApp sent to attorney.",
+          "author": "System",
+          "ts": 1782987748928
+        },
+        {
+          "id": "dd1cfabc-96cd-4bb1-9c75-4679dcb84f8a",
+          "text": "Client wants ANC. Give price, not moving forward",
+          "author": "Clerk",
+          "ts": 1783138971317
+        }
+      ]
+    },
+    {
+      "id": "KM-95NDLT",
+      "ref": "KM-21Y697",
+      "firstName": "TSHEPO HUDSON",
+      "lastName": "MASHAPA",
+      "phone": "0636357170",
+      "email": null,
+      "town": null,
+      "matterType": "Civil Litigation",
+      "urgency": "",
+      "summary": "unlawful arrest\nClient was arrested and detained for up to 3 months before he was released.",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": "2026-06-18T00:00:00.000Z",
+      "timeSlot": null,
+      "assignedTo": "Khongelani Malale",
+      "nextAction": "SERVE SECTION 3 NOT",
+      "nextActionDue": "2026-06-26T00:00:00.000Z",
+      "stage": "progress",
+      "stageAt": "2026-06-11T07:07:22.409Z",
+      "createdAt": "2026-06-11T07:07:15.415Z",
+      "updatedAt": "2026-06-11T07:07:15.415Z",
+      "notes": [
+        {
+          "id": "55cb9d25-9e0c-46d6-8946-94e5fa006b88",
+          "text": "Section 3 Notice drafted",
+          "author": "Khongelani Malale",
+          "ts": 1781787757978
+        }
+      ]
+    },
+    {
+      "id": "KM-6F0SE1",
+      "ref": "KM-YUJTGG",
+      "firstName": "SAFARII",
+      "lastName": "Travel Co",
+      "phone": "083 259 0754",
+      "email": "Safaritravelco@gmail.com",
+      "town": "Hoedspruit",
+      "matterType": "Civil Litigation",
+      "urgency": "Flexible",
+      "summary": "we are appointed as legal advisors for the company. Billed monthly",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": "2026-06-12T00:00:00.000Z",
+      "timeSlot": null,
+      "assignedTo": "Khongelani Malale",
+      "nextAction": "Draft agenda for meeting",
+      "nextActionDue": "2026-06-12T00:00:00.000Z",
+      "stage": "awaiting",
+      "stageAt": "2026-06-09T10:13:41.592Z",
+      "createdAt": "2026-06-09T09:06:20.052Z",
+      "updatedAt": "2026-06-09T09:06:20.052Z",
+      "notes": [
+        {
+          "id": "2ac8565d-1f12-44fe-a2fa-046f342edb79",
+          "text": "Letter sent to Paballo. Awaiting board meeting. Need to draft agenda",
+          "author": "Khongelani Malale",
+          "ts": 1780999988319
+        }
+      ]
+    },
+    {
+      "id": "KM-5VYMW2",
+      "ref": "KM-WOFEYQ",
+      "firstName": "Fortune",
+      "lastName": "Mhawule",
+      "phone": "0769237212",
+      "email": "fortune.mhawule@expsouthafrica.co.za",
+      "town": "Mpumalanga",
+      "matterType": "Estate & Trust Planning",
+      "urgency": "🟢 Within 2 weeks",
+      "summary": "Looking to change PTO to full title deed",
+      "consultType": "Virtual · WhatsApp / Video Call",
+      "preferredDate": "2026-06-16T00:00:00.000Z",
+      "timeSlot": "14:00–15:00",
+      "assignedTo": "Clerk",
+      "nextAction": "Contact client to confirm appointment",
+      "nextActionDue": "2026-06-16T00:00:00.000Z",
+      "stage": "final",
+      "stageAt": "2026-07-04T04:23:22.382Z",
+      "createdAt": "2026-06-09T00:10:58.538Z",
+      "updatedAt": "2026-06-09T00:10:58.538Z",
+      "notes": [
+        {
+          "id": "8e3a6215-e741-4e74-b303-1cae930511a8",
+          "text": "Inquiry received via website booking form. WhatsApp sent to attorney.",
+          "author": "System",
+          "ts": 1780963858614
+        },
+        {
+          "id": "1603b8ba-7f91-4bcc-9e3e-3a46973bb093",
+          "text": "consuktation booked for 19 June",
+          "author": "Khongelani Malale",
+          "ts": 1781170419435
+        },
+        {
+          "id": "02325fcc-19bc-4226-ae26-bc71e6440ac6",
+          "text": "Proposal received",
+          "author": "Clerk",
+          "ts": 1783138999433
+        }
+      ]
+    },
+    {
+      "id": "KM-58FRGE",
+      "ref": "KM-IF4GYB",
+      "firstName": "KGOTLELELO",
+      "lastName": "MUKHAWANE",
+      "phone": "0790716920",
+      "email": "KC.MUKHAWANE@GMAIL.COM",
+      "town": "POLOKWANE",
+      "matterType": "Family Law",
+      "urgency": "Flexible",
+      "summary": "Proposed settlement agreement was drafted and sent to the defendant, no response received. We need to finalize the the divorce summons and have the divorce actually started.",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": "2026-06-12T00:00:00.000Z",
+      "timeSlot": null,
+      "assignedTo": "Khongelani Malale",
+      "nextAction": "summons printd in three. Waiting for Annexure A",
+      "nextActionDue": "2026-07-23T00:00:00.000Z",
+      "stage": "awaiting",
+      "stageAt": "2026-07-09T14:20:02.226Z",
+      "createdAt": "2026-06-08T13:14:14.703Z",
+      "updatedAt": "2026-06-08T13:14:14.703Z",
+      "notes": [
+        {
+          "id": "eb73be61-2d7a-4c6b-ba88-b4027df04db6",
+          "text": "Summons done. Sent Annexure A to client",
+          "author": "Clerk",
+          "ts": 1783606740589
+        }
+      ]
+    },
+    {
+      "id": "KM-57NLJJ",
+      "ref": "KM-LKWBOV",
+      "firstName": "TSHOKOLO JONAS",
+      "lastName": "KOBANE",
+      "phone": "0721209130",
+      "email": null,
+      "town": "8910015600085",
+      "matterType": "RAF Claim",
+      "urgency": "Flexible",
+      "summary": "The client has signed the engagement agreement, Special Power of Attorneys \nClient had a court order granted in 17 March 2025. monies have nit been released yet.",
+      "consultType": "In-person · Tzaneen",
+      "preferredDate": "2026-06-12T00:00:00.000Z",
+      "timeSlot": null,
+      "assignedTo": "Clerk",
+      "nextAction": "Follow up letter with the instructing attorney.",
+      "nextActionDue": "2026-06-15T00:00:00.000Z",
+      "stage": "retainer",
+      "stageAt": "2026-06-08T12:52:32.965Z",
+      "createdAt": "2026-06-08T12:52:20.382Z",
+      "updatedAt": "2026-06-08T12:52:20.382Z",
+      "notes": [
+        {
+          "id": "588409a0-77db-4510-8685-c64ca9e7e36b",
+          "text": "Draft letter to attorney, scan and send with poa nad mandate",
+          "author": "Khongelani Malale",
+          "ts": 1781170363531
+        }
+      ]
+    }
+  ],
+  "activity_log": [
+    {
+      "ts": 1784537919007,
+      "user": "Khongelani Malale",
+      "action": "Logged in",
+      "matter": "",
+      "matterId": "",
+      "ref": "",
+      "detail": ""
+    },
+    {
+      "ts": 1784537884726,
+      "user": "Clerk",
+      "action": "Logged out",
+      "matter": "",
+      "matterId": "",
+      "ref": "",
+      "detail": ""
+    },
+    {
+      "ts": 1784537636716,
+      "user": "Clerk",
+      "action": "Logged in",
+      "matter": "",
+      "matterId": "",
+      "ref": "",
+      "detail": ""
+    },
+    {
+      "ts": 1784537636716,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "KGOTLELELO MUKHAWANE",
+      "matterId": "KM-58FRGE",
+      "ref": "KM-IF4GYB",
+      "detail": "10d in Awaiting Response"
+    },
+    {
+      "ts": 1784537636715,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "Fortune Mhawule",
+      "matterId": "KM-5VYMW2",
+      "ref": "KM-WOFEYQ",
+      "detail": "16d in Finalisation"
+    },
+    {
+      "ts": 1784537636714,
+      "user": "Clerk",
+      "action": "Action due",
+      "matter": "TSHEPO HUDSON MASHAPA",
+      "matterId": "KM-95NDLT",
+      "ref": "KM-21Y697",
+      "detail": "SERVE SECTION 3 NOT"
+    },
+    {
+      "ts": 1784537636713,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "TSHEPO HUDSON MASHAPA",
+      "matterId": "KM-95NDLT",
+      "ref": "KM-21Y697",
+      "detail": "39d in In Progress"
+    },
+    {
+      "ts": 1784537636712,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "ELIAS  NTSANE MAKUME",
+      "matterId": "KM-DDG7GJ",
+      "ref": "KM-NF7Q7R",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636711,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "ELIAS  NTSANE MAKUME",
+      "matterId": "KM-DDG8AB",
+      "ref": "KM-S88GHG",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636710,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "STEPHEN MACHEPE MAKWELA",
+      "matterId": "KM-DDP35E",
+      "ref": "KM-Z20SKQ",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636710,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "VIRGINIA MALATSA",
+      "matterId": "KM-DE4EVQ",
+      "ref": "KM-FZONFP",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636709,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "AGNES JOSEPH",
+      "matterId": "KM-DEZA14",
+      "ref": "KM-F2SVNH",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636708,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "DOLLY MASWANGANYI",
+      "matterId": "KM-DH63WW",
+      "ref": "KM-VQU6AK",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636707,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "MMAMOYA MERCY LETLOJANE",
+      "matterId": "KM-DH8BRK",
+      "ref": "KM-PNFUML",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1784537636706,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "RENEILWE TAU",
+      "matterId": "KM-DI4UL6",
+      "ref": "KM-P9X88V",
+      "detail": "10d in New Inquiry"
+    },
+    {
+      "ts": 1781694583085,
+      "user": "Clerk",
+      "action": "Logged in",
+      "matter": "",
+      "matterId": "",
+      "ref": "",
+      "detail": ""
+    },
+    {
+      "ts": 1781694583084,
+      "user": "Clerk",
+      "action": "Action due",
+      "matter": "TSHOKOLO JONAS KOBANE",
+      "matterId": "KM-57NLJJ",
+      "ref": "KM-LKWBOV",
+      "detail": "Follow up letter with the instructing attorney."
+    },
+    {
+      "ts": 1781694583083,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "TSHOKOLO JONAS KOBANE",
+      "matterId": "KM-57NLJJ",
+      "ref": "KM-LKWBOV",
+      "detail": "8d in Retainer Signed"
+    },
+    {
+      "ts": 1781694583083,
+      "user": "Clerk",
+      "action": "Action due",
+      "matter": "KGOTLELELO MUKHAWANE",
+      "matterId": "KM-58FRGE",
+      "ref": "KM-IF4GYB",
+      "detail": "FINALIZE SUMMONS"
+    },
+    {
+      "ts": 1781694583081,
+      "user": "Clerk",
+      "action": "Action due",
+      "matter": "Fortune Mhawule",
+      "matterId": "KM-5VYMW2",
+      "ref": "KM-WOFEYQ",
+      "detail": "Contact client to confirm appointment"
+    },
+    {
+      "ts": 1781694583080,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "Fortune Mhawule",
+      "matterId": "KM-5VYMW2",
+      "ref": "KM-WOFEYQ",
+      "detail": "6d in Consultation Booked"
+    },
+    {
+      "ts": 1781694583079,
+      "user": "Clerk",
+      "action": "Action due",
+      "matter": "SAFARII Travel Co",
+      "matterId": "KM-6F0SE1",
+      "ref": "KM-YUJTGG",
+      "detail": "Draft agenda for meeting"
+    },
+    {
+      "ts": 1781694583078,
+      "user": "Clerk",
+      "action": "Became overdue",
+      "matter": "SAFARII Travel Co",
+      "matterId": "KM-6F0SE1",
+      "ref": "KM-YUJTGG",
+      "detail": "8d in Awaiting Response"
+    },
+    {
+      "ts": 1781694583077,
+      "user": "Clerk",
+      "action": "Action due",
+      "matter": "TSHEPO HUDSON MASHAPA",
+      "matterId": "KM-95NDLT",
+      "ref": "KM-21Y697",
+      "detail": "Please edit the section 3 notice and finalise itl"
+    }
+  ],
+  "notifications": [
+    {
+      "ts": 1784537636715,
+      "title": "⏰ Matter overdue",
+      "body": "KGOTLELELO MUKHAWANE — 10d in Awaiting Response",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636715,
+      "title": "⏰ Matter overdue",
+      "body": "Fortune Mhawule — 16d in Finalisation",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636714,
+      "title": "📌 Action due",
+      "body": "TSHEPO HUDSON MASHAPA — \"SERVE SECTION 3 NOT\"",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636713,
+      "title": "⏰ Matter overdue",
+      "body": "TSHEPO HUDSON MASHAPA — 39d in In Progress",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636712,
+      "title": "⏰ Matter overdue",
+      "body": "ELIAS  NTSANE MAKUME — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636711,
+      "title": "⏰ Matter overdue",
+      "body": "ELIAS  NTSANE MAKUME — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636710,
+      "title": "⏰ Matter overdue",
+      "body": "STEPHEN MACHEPE MAKWELA — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636709,
+      "title": "⏰ Matter overdue",
+      "body": "VIRGINIA MALATSA — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636708,
+      "title": "⏰ Matter overdue",
+      "body": "AGNES JOSEPH — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636707,
+      "title": "⏰ Matter overdue",
+      "body": "DOLLY MASWANGANYI — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636707,
+      "title": "⏰ Matter overdue",
+      "body": "MMAMOYA MERCY LETLOJANE — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1784537636705,
+      "title": "⏰ Matter overdue",
+      "body": "RENEILWE TAU — 10d in New Inquiry",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583084,
+      "title": "📌 Action due",
+      "body": "TSHOKOLO JONAS KOBANE — \"Follow up letter with the instructing at\"",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583083,
+      "title": "⏰ Matter overdue",
+      "body": "TSHOKOLO JONAS KOBANE — 8d in Retainer Signed",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583081,
+      "title": "📌 Action due",
+      "body": "KGOTLELELO MUKHAWANE — \"FINALIZE SUMMONS\"",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583080,
+      "title": "📌 Action due",
+      "body": "Fortune Mhawule — \"Contact client to confirm appointment\"",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583079,
+      "title": "⏰ Matter overdue",
+      "body": "Fortune Mhawule — 6d in Consultation Booked",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583079,
+      "title": "📌 Action due",
+      "body": "SAFARII Travel Co — \"Draft agenda for meeting\"",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583078,
+      "title": "⏰ Matter overdue",
+      "body": "SAFARII Travel Co — 8d in Awaiting Response",
+      "level": "due",
+      "read": false
+    },
+    {
+      "ts": 1781694583076,
+      "title": "📌 Action due",
+      "body": "TSHEPO HUDSON MASHAPA — \"Please edit the section 3 notice and fin\"",
+      "level": "due",
+      "read": false
+    }
+  ]
+}
