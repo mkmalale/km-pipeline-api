@@ -58,6 +58,128 @@ function hashPin(pin) {
   } catch (e) { console.error("users table init:", e.message); }
 })();
 
+// ── BILLING: rates + entries, note sentiment, seed from Fee Agreement 2025/6 ──
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS billing_rates (
+        id         BIGSERIAL PRIMARY KEY,
+        category   TEXT NOT NULL,
+        item       TEXT NOT NULL,
+        unit       TEXT NOT NULL,
+        amount     NUMERIC(10,2) NOT NULL,
+        sort       INT DEFAULT 0,
+        active     BOOLEAN DEFAULT true,
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS billing_entries (
+        id          BIGSERIAL PRIMARY KEY,
+        matter_id   TEXT NOT NULL REFERENCES matters(id) ON DELETE CASCADE,
+        rate_id     BIGINT,
+        category    TEXT,
+        item        TEXT,
+        unit        TEXT,
+        qty         NUMERIC(10,2) DEFAULT 1,
+        unit_amount NUMERIC(10,2) NOT NULL,
+        amount      NUMERIC(10,2) NOT NULL,
+        description TEXT,
+        author      TEXT,
+        billed      BOOLEAN DEFAULT false,
+        created_at  TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_billing_matter ON billing_entries(matter_id);
+      ALTER TABLE notes ADD COLUMN IF NOT EXISTS sentiment TEXT;
+      ALTER TABLE matters ADD COLUMN IF NOT EXISTS court_date DATE;
+      ALTER TABLE matters ADD COLUMN IF NOT EXISTS court_label TEXT;
+      ALTER TABLE matters ADD COLUMN IF NOT EXISTS reminder_sent_for DATE;
+      ALTER TABLE matters ADD COLUMN IF NOT EXISTS retainer_target NUMERIC(12,2);
+      CREATE TABLE IF NOT EXISTS retainer_payments (
+        id BIGSERIAL PRIMARY KEY,
+        matter_id TEXT NOT NULL REFERENCES matters(id) ON DELETE CASCADE,
+        amount NUMERIC(12,2) NOT NULL,
+        method TEXT, reference TEXT, author TEXT,
+        received_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_ret_matter ON retainer_payments(matter_id);
+      CREATE TABLE IF NOT EXISTS calendar_events (
+        id BIGSERIAL PRIMARY KEY,
+        matter_id TEXT REFERENCES matters(id) ON DELETE CASCADE,
+        title TEXT NOT NULL,
+        event_date DATE NOT NULL,
+        event_time TEXT,
+        type TEXT DEFAULT 'appointment',
+        notes TEXT, created_by TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_cal_date ON calendar_events(event_date);
+    `);
+
+    // Seed rates once from the Fee Agreement 2025/6
+    const { rows: rc } = await pool.query("SELECT COUNT(*)::int AS c FROM billing_rates");
+    if (rc[0].c === 0) {
+      const R = [
+        ["Consultation","Initial Consultation (In Person) — taking instruction & opening file","file",2500.00],
+        ["Consultation","Initial Consultation (Virtual) — taking instruction & opening file","file",3000.00],
+        ["Consultation","Consultation — per hour","hour",550.00],
+        ["Pre-Trial","Pre-Trial — per hour [Attorney]","hour",550.00],
+        ["Pre-Trial","Pre-Trial — per hour [Candidate Attorney/Paralegal]","hour",300.00],
+        ["Inspection in Loco","Inspection in Loco — per hour [Attorney]","hour",550.00],
+        ["Inspection in Loco","Inspection in Loco — per hour [Candidate Attorney/Paralegal]","hour",300.00],
+        ["Inspection in Loco","Inspection in Loco — per hour [Assistant]","hour",150.00],
+        ["Drawing & Drafting","Power of Attorney (per page)","page",100.00],
+        ["Drawing & Drafting","Fee Agreement (per page)","page",100.00],
+        ["Drawing & Drafting","General Drafting & Research (per page)","page",115.00],
+        ["Drawing & Drafting","Confirmatory Affidavit (per 250 words)","250 words",100.00],
+        ["Drawing & Drafting","Witness Statements (per 250 words)","250 words",200.00],
+        ["Drawing & Drafting","Instruction to Counsel (per page)","page",100.00],
+        ["Drawing & Drafting","Draw Pleadings (per 250 words)","250 words",250.00],
+        ["Drawing & Drafting","Draw Notice i.t.o Rule 37(4) (per 250 words)","250 words",250.00],
+        ["Drawing & Drafting","Draw Pre-Trial minutes (per 250 words)","250 words",250.00],
+        ["Drawing & Drafting","Draw Notices (excl Rule 37(4)) (per 250 words)","250 words",100.00],
+        ["Drawing & Drafting","Draw Notice of Motion (per page)","page",100.00],
+        ["Drawing & Drafting","Draw Founding Affidavit (per page)","page",250.00],
+        ["Drawing & Drafting","Draw Practice Note (per 250 words)","250 words",250.00],
+        ["Letters & Emails","Send Email (per page)","page",50.00],
+        ["Letters & Emails","Draw Letter (per page)","page",50.00],
+        ["Letters & Emails","WhatsApp message (received and/or sent)","message",20.00],
+        ["Perusal","Perusal — any document (per page)","page",15.00],
+        ["Perusal","Peruse Email / Letter received (per page)","page",10.00],
+        ["Index & Paginate","Index & Paginate [Attorney] (per 15 minutes)","15 min",250.00],
+        ["Index & Paginate","Index & Paginate [Candidate Attorney] (per 15 minutes)","15 min",100.00],
+        ["Miscellaneous","Making copies (per page)","page",4.50],
+        ["Miscellaneous","Telephone call [Attorney] (per 5 min, rounded up)","5 min",50.00],
+        ["Miscellaneous","Telephone call [Candidate Attorney] (per 5 min, rounded up)","5 min",25.00],
+        ["Miscellaneous","Travelling Time [Attorney] (per minute)","minute",15.00],
+        ["Miscellaneous","Travelling Disbursement (per km)","km",4.50],
+        ["Execution","Writ of Execution — drafting, issuing & execution (excl disbursements)","item",950.00],
+        ["Execution","Writ of Execution — re-issue","item",250.00],
+      ];
+      let i = 0;
+      for (const [cat,item,unit,amt] of R) {
+        await pool.query(
+          "INSERT INTO billing_rates (category,item,unit,amount,sort) VALUES ($1,$2,$3,$4,$5)",
+          [cat,item,unit,amt,i++]
+        );
+      }
+      console.log("Seeded billing rates.");
+    }
+
+    // Back-date: give every existing matter an opening baseline entry if it has none
+    const dep = await pool.query(
+      "SELECT id, amount FROM billing_rates WHERE item LIKE 'Initial Consultation (In Person)%' LIMIT 1"
+    );
+    if (dep.rows.length) {
+      await pool.query(`
+        INSERT INTO billing_entries (matter_id, rate_id, category, item, unit, qty, unit_amount, amount, description, author)
+        SELECT m.id, $1, 'Consultation', 'Opening of file (back-dated baseline)', 'file', 1, $2, $2,
+               'Baseline entry created when billing was enabled', 'System'
+        FROM matters m
+        WHERE NOT EXISTS (SELECT 1 FROM billing_entries b WHERE b.matter_id = m.id)
+      `, [dep.rows[0].id, dep.rows[0].amount]);
+    }
+  } catch (e) { console.error("billing init:", e.message); }
+})();
+
 // ── MIDDLEWARE ────────────────────────────────────────────────────
 app.use(helmet());
 app.use(express.json());
@@ -85,6 +207,48 @@ function auth(req, res, next) {
   const key = req.headers["x-api-key"] || req.query.api_key;
   if (key !== API_KEY) return res.status(401).json({ error: "Unauthorised" });
   next();
+}
+
+// Attorney-only guard — verifies the acting user's role in the DB.
+// Client sends x-user-id (obtained at PIN login). Rates & finance are gated here.
+async function requireAttorney(req, res, next) {
+  try {
+    const uid = req.headers["x-user-id"];
+    if (!uid) return res.status(403).json({ error: "Attorney access required" });
+    const { rows } = await pool.query("SELECT role FROM users WHERE id = $1", [uid]);
+    if (!rows.length || rows[0].role !== "attorney")
+      return res.status(403).json({ error: "Attorney access required" });
+    next();
+  } catch (e) { res.status(500).json({ error: e.message }); }
+}
+
+// ── EMAIL (Resend) — used for attorney alerts and client court reminders ──
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || "kmalale@malaleinc.co.za";
+const MAIL_FROM    = process.env.NOTIFY_FROM  || "K Malale Attorneys <onboarding@resend.dev>";
+async function sendEmail(subject, html, to) {
+  if (!process.env.RESEND_API_KEY) return false;   // email stays off until key is set
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Authorization": "Bearer " + process.env.RESEND_API_KEY, "Content-Type": "application/json" },
+      body: JSON.stringify({ from: MAIL_FROM, to: [to || NOTIFY_EMAIL], subject, html,
+                             reply_to: NOTIFY_EMAIL }),
+    });
+    return r.ok;
+  } catch (e) { console.error("email error:", e.message); return false; }
+}
+function emailShell(title, bodyHtml) {
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;border:1px solid #eee;border-radius:10px;overflow:hidden">
+    <div style="background:#0d0d0d;padding:16px 20px"><span style="color:#C4A06A;font-size:18px;letter-spacing:1px">K&nbsp;MALALE&nbsp;ATTORNEYS</span><div style="color:rgba(255,255,255,.5);font-size:11px;letter-spacing:2px;text-transform:uppercase">Your Rights, Our Priority</div></div>
+    <div style="padding:22px 20px;color:#1a1a1a;line-height:1.7;font-size:14px">
+      <h2 style="font-size:17px;color:#9A7B4F;margin:0 0 12px">${title}</h2>
+      ${bodyHtml}
+    </div>
+    <div style="background:#FAF7F2;padding:14px 20px;font-size:12px;color:#8a827a">
+      K Malale Attorneys Inc · Office 10, Emerald Building, 6 Morgan Street, Tzaneen 0850<br>
+      072 591 3980 · 082 613 2230 · kmalale@malaleinc.co.za · www.malaleinc.co.za
+    </div>
+  </div>`;
 }
 
 // ── HEALTH ────────────────────────────────────────────────────────
@@ -254,134 +418,4 @@ app.post("/api/matters", auth, async (req, res) => {
     `, [
       id, ref,
       d.first_name || d.firstName, d.last_name || d.lastName,
-      d.phone, d.email || null, d.town || null, d.id_number || d.idNumber || null,
-      d.matter_type || d.matterType, d.urgency, d.summary,
-      d.consult_type || d.consultType || "In-person · Tzaneen",
-      d.preferred_date || d.preferredDate || null,
-      d.alt_date || d.altDate || null,
-      d.time_slot || d.timeSlot || null,
-      d.referral || null,
-      d.assigned_to || d.assignedTo || "Clerk",
-      d.next_action || d.nextAction || "Contact client to confirm appointment",
-      d.next_action_due || d.nextActionDue || null,
-      d.stage || "inquiry"
-    ]);
-    // Auto-add system note if from website
-    if (d.source === "website") {
-      await pool.query(
-        `INSERT INTO notes (matter_id, text, author) VALUES ($1, $2, 'System')`,
-        [id, "Inquiry received via website booking form. WhatsApp sent to attorney."]
-      );
-      const m = rows[0];
-      const urgent = (m.urgency||"").toLowerCase().includes("urgent");
-      sendEmail(
-        `${urgent?"🔴 URGENT — ":""}New inquiry — ${m.first_name} ${m.last_name||""}`,
-        `<div style="font-family:sans-serif">
-          <h2 style="color:#9A7B4F">New Client Inquiry</h2>
-          <p><strong>${m.first_name} ${m.last_name||""}</strong> (${m.ref})</p>
-          <p>Matter: ${m.matter_type||"—"}<br>Phone: ${m.phone||"—"}<br>Email: ${m.email||"—"}<br>Urgency: ${m.urgency||"—"}</p>
-          <p>${m.summary||""}</p>
-          <p style="color:#888;font-size:12px">Received ${new Date().toLocaleString("en-ZA")}</p>
-        </div>`
-      );
-    }
-    res.status(201).json({ data: { ...rows[0], notes: [] } });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// PATCH /api/matters/:id — update any fields
-app.patch("/api/matters/:id", auth, async (req, res) => {
-  try {
-    const allowed = [
-      "stage","stage_at","first_name","last_name","phone","email","town",
-      "matter_type","urgency","summary","consult_type","preferred_date",
-      "assigned_to","next_action","next_action_due"
-    ];
-    const d = req.body;
-    const sets = [], params = [];
-    // Normalise camelCase → snake_case
-    const toSnake = k => k.replace(/([A-Z])/g, "_$1").toLowerCase();
-    Object.entries(d).forEach(([k, v]) => {
-      const col = toSnake(k);
-      if (allowed.includes(col)) { params.push(v); sets.push(`${col} = $${params.length}`); }
-    });
-    if (!sets.length) return res.status(400).json({ error: "No valid fields to update" });
-    // Auto set stage_at when stage changes
-    if (Object.keys(d).includes("stage") && !Object.keys(d).includes("stage_at")) {
-      sets.push("stage_at = NOW()");
-    }
-    params.push(req.params.id);
-    const { rows } = await pool.query(
-      `UPDATE matters SET ${sets.join(",")} WHERE id = $${params.length} RETURNING *`,
-      params
-    );
-    if (!rows.length) return res.status(404).json({ error: "Not found" });
-    // Email notification on stage change
-    if (Object.keys(d).map(k=>k.replace(/([A-Z])/g,"_$1").toLowerCase()).includes("stage")) {
-      const m = rows[0];
-      sendEmail(
-        `Matter status changed — ${m.first_name} ${m.last_name||""}`,
-        `<div style="font-family:sans-serif">
-          <h2 style="color:#9A7B4F">K Malale Attorneys — Pipeline Update</h2>
-          <p><strong>${m.first_name} ${m.last_name||""}</strong> (${m.ref}) moved to stage: <strong>${m.stage}</strong></p>
-          <p>Matter type: ${m.matter_type||"—"}<br>Phone: ${m.phone||"—"}<br>Urgency: ${m.urgency||"—"}</p>
-          <p style="color:#888;font-size:12px">Logged ${new Date().toLocaleString("en-ZA")}</p>
-        </div>`
-      );
-    }
-    res.json({ data: rows[0] });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// DELETE /api/matters/:id
-app.delete("/api/matters/:id", auth, async (req, res) => {
-  try {
-    await pool.query("DELETE FROM matters WHERE id = $1", [req.params.id]);
-    res.json({ deleted: req.params.id });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// ══════════════════════════════════════════════════════════════════
-//  NOTES
-// ══════════════════════════════════════════════════════════════════
-
-// POST /api/matters/:id/notes
-app.post("/api/matters/:id/notes", auth, async (req, res) => {
-  try {
-    const { text, author = "Clerk" } = req.body;
-    if (!text) return res.status(400).json({ error: "text is required" });
-    const { rows } = await pool.query(
-      `INSERT INTO notes (matter_id, text, author) VALUES ($1,$2,$3) RETURNING *`,
-      [req.params.id, text, author]
-    );
-    res.status(201).json({ data: rows[0] });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// DELETE /api/notes/:id
-app.delete("/api/notes/:id", auth, async (req, res) => {
-  try {
-    await pool.query("DELETE FROM notes WHERE id = $1", [req.params.id]);
-    res.json({ deleted: req.params.id });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-// ── STATS endpoint ────────────────────────────────────────────────
-app.get("/api/stats", auth, async (req, res) => {
-  try {
-    const { rows } = await pool.query(`
-      SELECT
-        COUNT(*) FILTER (WHERE stage != 'closed') AS active,
-        COUNT(*) FILTER (WHERE urgency LIKE 'Urgent%' AND stage != 'closed') AS urgent,
-        COUNT(*) AS total,
-        COUNT(*) FILTER (WHERE stage = 'inquiry'   AND NOW() - stage_at > INTERVAL '1 day')  AS overdue_inquiry,
-        COUNT(*) FILTER (WHERE stage = 'booked'    AND NOW() - stage_at > INTERVAL '3 days') AS overdue_booked,
-        COUNT(*) FILTER (WHERE stage = 'progress'  AND NOW() - stage_at > INTERVAL '14 days') AS overdue_progress,
-        COUNT(*) FILTER (WHERE stage = 'awaiting'  AND NOW() - stage_at > INTERVAL '7 days') AS overdue_awaiting
-      FROM matters
-    `);
-    res.json({ data: rows[0] });
-  } catch (e) { res.status(500).json({ error: e.message }); }
-});
-
-app.listen(PORT, () => console.log(`KM Pipeline API running on port ${PORT}`));
+      d.phone, d.email || null, d.town
