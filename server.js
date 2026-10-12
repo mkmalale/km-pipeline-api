@@ -191,7 +191,7 @@ app.use(cors({
     /\.malaleinc\.co\.za$/
   ],
   methods: ["GET","POST","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization","x-api-key"],
+  allowedHeaders: ["Content-Type","Authorization","x-api-key","x-user-id"],
 }));
 
 // Rate limiting
