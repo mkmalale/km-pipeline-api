@@ -152,6 +152,7 @@ process.on("unhandledRejection", (reason) => {
       ALTER TABLE matters ADD COLUMN IF NOT EXISTS court_label TEXT;
       ALTER TABLE matters ADD COLUMN IF NOT EXISTS reminder_sent_for DATE;
       ALTER TABLE matters ADD COLUMN IF NOT EXISTS retainer_target NUMERIC(12,2);
+      ALTER TABLE matters ADD COLUMN IF NOT EXISTS claim_amount NUMERIC(14,2);
       CREATE TABLE IF NOT EXISTS retainer_payments (
         id BIGSERIAL PRIMARY KEY,
         matter_id TEXT NOT NULL REFERENCES matters(id) ON DELETE CASCADE,
@@ -470,9 +471,10 @@ app.post("/api/matters", auth, async (req, res) => {
         id, ref, first_name, last_name, phone, email, town, id_number,
         matter_type, urgency, summary, consult_type, preferred_date, alt_date,
         time_slot, referral, assigned_to, next_action, next_action_due,
+        court_date, court_label, claim_amount,
         stage, stage_at
       ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,NOW()
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,NOW()
       ) RETURNING *
     `, [
       id, ref,
@@ -487,6 +489,9 @@ app.post("/api/matters", auth, async (req, res) => {
       d.assigned_to || d.assignedTo || "Clerk",
       d.next_action || d.nextAction || "Contact client to confirm appointment",
       d.next_action_due || d.nextActionDue || null,
+      d.court_date || d.courtDate || null,
+      d.court_label || d.courtLabel || null,
+      (d.claim_amount || d.claimAmount) ? Number(d.claim_amount || d.claimAmount) : null,
       d.stage || "inquiry"
     ]);
     // Auto-add system note if from website
@@ -518,7 +523,7 @@ app.patch("/api/matters/:id", auth, async (req, res) => {
     const allowed = [
       "stage","stage_at","first_name","last_name","phone","email","town",
       "matter_type","urgency","summary","consult_type","preferred_date",
-      "assigned_to","next_action","next_action_due","court_date","court_label","retainer_target"
+      "assigned_to","next_action","next_action_due","court_date","court_label","retainer_target","claim_amount"
     ];
     const d = req.body;
     const sets = [], params = [];
