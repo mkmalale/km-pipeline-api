@@ -29,6 +29,65 @@ function hashPin(pin) {
   return crypto.createHash("sha256").update(String(pin) + PIN_PEPPER).digest("hex");
 }
 
+// ── ERROR / EVENT LOGGING ─────────────────────────────────────────
+// Everything that goes wrong (server OR client) is captured here, kept
+// in a DB table (survives restarts, unlike a file on Vercel) plus an
+// in-memory backup buffer, and is downloadable as a plain-text "notes"
+// log by the attorney. One bad request can never crash the whole app.
+const ERR_BUFFER = [];            // last N errors held in memory as a fallback
+const ERR_BUFFER_MAX = 500;
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS error_log (
+        id         BIGSERIAL PRIMARY KEY,
+        level      TEXT NOT NULL DEFAULT 'error',
+        source     TEXT,
+        message    TEXT NOT NULL,
+        stack      TEXT,
+        context    TEXT,
+        actor      TEXT,
+        url        TEXT,
+        user_agent TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_errlog_time ON error_log(created_at DESC);
+    `);
+  } catch (e) { console.error("error_log table init:", e.message); }
+})();
+
+async function logError(entry) {
+  const e = {
+    level:      entry.level   || "error",
+    source:     entry.source  || "server",
+    message:    String(entry.message || "Unknown error").slice(0, 4000),
+    stack:      entry.stack   ? String(entry.stack).slice(0, 8000)   : null,
+    context:    entry.context ? String(entry.context).slice(0, 2000) : null,
+    actor:      entry.actor   ? String(entry.actor).slice(0, 200)    : null,
+    url:        entry.url     ? String(entry.url).slice(0, 500)      : null,
+    user_agent: entry.user_agent ? String(entry.user_agent).slice(0, 400) : null,
+    ts: new Date().toISOString(),
+  };
+  ERR_BUFFER.push(e);
+  if (ERR_BUFFER.length > ERR_BUFFER_MAX) ERR_BUFFER.shift();
+  console.error(`[${e.ts}] ${e.source}/${e.level}: ${e.message}${e.context ? " | " + e.context : ""}`);
+  try {
+    await pool.query(
+      `INSERT INTO error_log (level, source, message, stack, context, actor, url, user_agent)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+      [e.level, e.source, e.message, e.stack, e.context, e.actor, e.url, e.user_agent]
+    );
+  } catch (dbErr) { console.error("logError DB write failed:", dbErr.message); }
+  return e;
+}
+
+// Last line of defence: never let an unhandled error take the process down.
+process.on("uncaughtException",  (err) => logError({ message: err.message, stack: err.stack, context: "uncaughtException" }));
+process.on("unhandledRejection", (reason) => {
+  const err = reason instanceof Error ? reason : new Error(String(reason));
+  logError({ message: err.message, stack: err.stack, context: "unhandledRejection" });
+});
+
 // ── ENSURE users TABLE + SEED DEFAULTS ────────────────────────────
 (async () => {
   try {
@@ -891,6 +950,74 @@ app.get("/api/stats", auth, async (req, res) => {
     `);
     res.json({ data: rows[0] });
   } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── CLIENT ERROR INTAKE + LOG VIEWING ─────────────────────────────
+// The website posts any exception it catches to /api/errors (api-key
+// protected). The attorney can read the log as JSON, download it as a
+// plain-text notes file, or clear it.
+app.post("/api/errors", auth, async (req, res) => {
+  try {
+    const d = req.body || {};
+    const saved = await logError({
+      level: d.level || "error",
+      source: "client",
+      message: d.message,
+      stack: d.stack,
+      context: d.context,
+      actor: d.actor,
+      url: d.url,
+      user_agent: req.headers["user-agent"],
+    });
+    res.status(201).json({ data: saved });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get("/api/errors", auth, requireAttorney, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 200, 1000);
+    const { rows } = await pool.query("SELECT * FROM error_log ORDER BY created_at DESC LIMIT $1", [limit]);
+    res.json({ data: rows });
+  } catch (e) {
+    res.json({ data: [...ERR_BUFFER].reverse(), note: "served from memory (DB unavailable)" });
+  }
+});
+
+app.get("/api/errors.txt", auth, requireAttorney, async (req, res) => {
+  try {
+    let rows;
+    try { rows = (await pool.query("SELECT * FROM error_log ORDER BY created_at DESC LIMIT 2000")).rows; }
+    catch { rows = [...ERR_BUFFER].reverse(); }
+    const lines = rows.map(r =>
+      `[${r.created_at ? new Date(r.created_at).toISOString() : r.ts}] ${r.source}/${r.level}  ${r.actor || "-"}\n` +
+      `  ${r.message}\n` +
+      (r.context ? `  context: ${r.context}\n` : "") +
+      (r.url ? `  url: ${r.url}\n` : "") +
+      (r.stack ? `  stack: ${String(r.stack).split("\n").slice(0, 6).join("\n         ")}\n` : "")
+    );
+    const header = `K MALALE ATTORNEYS — ERROR & EVENT LOG\nGenerated: ${new Date().toISOString()}\nEntries: ${rows.length}\n${"=".repeat(60)}\n\n`;
+    res.setHeader("Content-Type", "text/plain; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="km-error-log-${new Date().toISOString().slice(0,10)}.txt"`);
+    res.send(header + lines.join("\n"));
+  } catch (e) { res.status(500).send("Could not build log: " + e.message); }
+});
+
+app.delete("/api/errors", auth, requireAttorney, async (req, res) => {
+  try { await pool.query("DELETE FROM error_log"); ERR_BUFFER.length = 0; res.json({ cleared: true }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── 404 + GLOBAL ERROR HANDLER (must stay last) ───────────────────
+app.use((req, res) => res.status(404).json({ error: "Not found", path: req.path }));
+app.use((err, req, res, next) => {
+  logError({
+    message: err.message, stack: err.stack,
+    context: "express:" + req.method + " " + req.path,
+    actor: req.headers["x-user-id"] || null,
+    url: req.originalUrl, user_agent: req.headers["user-agent"],
+  });
+  if (res.headersSent) return next(err);
+  res.status(err.status || 500).json({ error: "Server error", ref: Date.now() });
 });
 
 app.listen(PORT, () => console.log(`KM Pipeline API running on port ${PORT}`));
