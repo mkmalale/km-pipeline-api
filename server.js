@@ -1,11 +1,12 @@
 /**
- * K MALALE ATTORNEYS INC — PIPELINE API SERVER
+ * K MALALE ATTORNEYS INC â PIPELINE API SERVER
  * Stack: Node.js + Express + PostgreSQL
- * Deploy: Railway · Render · Heroku · any Node host
- * ─────────────────────────────────────────────
+ * Deploy: Railway Â· Render Â· Heroku Â· any Node host
+ * âââââââââââââââââââââââââââââââââââââââââââââ
  * npm install express pg cors dotenv helmet express-rate-limit
  */
 
+// redeploy 2026-10-12T13:10:45.448Z
 require("dotenv").config();
 const express    = require("express");
 const { Pool }   = require("pg");
@@ -17,19 +18,19 @@ const crypto     = require("crypto");
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ── DATABASE ──────────────────────────────────────────────────────
+// ââ DATABASE ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
 });
 
-// ── PIN HASHING ───────────────────────────────────────────────────
+// ââ PIN HASHING âââââââââââââââââââââââââââââââââââââââââââââââââââ
 const PIN_PEPPER = process.env.PIN_PEPPER || "km-malale-pepper-2230";
 function hashPin(pin) {
   return crypto.createHash("sha256").update(String(pin) + PIN_PEPPER).digest("hex");
 }
 
-// ── ERROR / EVENT LOGGING ─────────────────────────────────────────
+// ââ ERROR / EVENT LOGGING âââââââââââââââââââââââââââââââââââââââââ
 // Everything that goes wrong (server OR client) is captured here, kept
 // in a DB table (survives restarts, unlike a file on Vercel) plus an
 // in-memory backup buffer, and is downloadable as a plain-text "notes"
@@ -88,7 +89,7 @@ process.on("unhandledRejection", (reason) => {
   logError({ message: err.message, stack: err.stack, context: "unhandledRejection" });
 });
 
-// ── ENSURE users TABLE + SEED DEFAULTS ────────────────────────────
+// ââ ENSURE users TABLE + SEED DEFAULTS ââââââââââââââââââââââââââââ
 (async () => {
   try {
     await pool.query(`
@@ -117,7 +118,7 @@ process.on("unhandledRejection", (reason) => {
   } catch (e) { console.error("users table init:", e.message); }
 })();
 
-// ── BILLING: rates + entries, note sentiment, seed from Fee Agreement 2025/6 ──
+// ââ BILLING: rates + entries, note sentiment, seed from Fee Agreement 2025/6 ââ
 (async () => {
   try {
     await pool.query(`
@@ -178,14 +179,14 @@ process.on("unhandledRejection", (reason) => {
     const { rows: rc } = await pool.query("SELECT COUNT(*)::int AS c FROM billing_rates");
     if (rc[0].c === 0) {
       const R = [
-        ["Consultation","Initial Consultation (In Person) — taking instruction & opening file","file",2500.00],
-        ["Consultation","Initial Consultation (Virtual) — taking instruction & opening file","file",3000.00],
-        ["Consultation","Consultation — per hour","hour",550.00],
-        ["Pre-Trial","Pre-Trial — per hour [Attorney]","hour",550.00],
-        ["Pre-Trial","Pre-Trial — per hour [Candidate Attorney/Paralegal]","hour",300.00],
-        ["Inspection in Loco","Inspection in Loco — per hour [Attorney]","hour",550.00],
-        ["Inspection in Loco","Inspection in Loco — per hour [Candidate Attorney/Paralegal]","hour",300.00],
-        ["Inspection in Loco","Inspection in Loco — per hour [Assistant]","hour",150.00],
+        ["Consultation","Initial Consultation (In Person) â taking instruction & opening file","file",2500.00],
+        ["Consultation","Initial Consultation (Virtual) â taking instruction & opening file","file",3000.00],
+        ["Consultation","Consultation â per hour","hour",550.00],
+        ["Pre-Trial","Pre-Trial â per hour [Attorney]","hour",550.00],
+        ["Pre-Trial","Pre-Trial â per hour [Candidate Attorney/Paralegal]","hour",300.00],
+        ["Inspection in Loco","Inspection in Loco â per hour [Attorney]","hour",550.00],
+        ["Inspection in Loco","Inspection in Loco â per hour [Candidate Attorney/Paralegal]","hour",300.00],
+        ["Inspection in Loco","Inspection in Loco â per hour [Assistant]","hour",150.00],
         ["Drawing & Drafting","Power of Attorney (per page)","page",100.00],
         ["Drawing & Drafting","Fee Agreement (per page)","page",100.00],
         ["Drawing & Drafting","General Drafting & Research (per page)","page",115.00],
@@ -202,7 +203,7 @@ process.on("unhandledRejection", (reason) => {
         ["Letters & Emails","Send Email (per page)","page",50.00],
         ["Letters & Emails","Draw Letter (per page)","page",50.00],
         ["Letters & Emails","WhatsApp message (received and/or sent)","message",20.00],
-        ["Perusal","Perusal — any document (per page)","page",15.00],
+        ["Perusal","Perusal â any document (per page)","page",15.00],
         ["Perusal","Peruse Email / Letter received (per page)","page",10.00],
         ["Index & Paginate","Index & Paginate [Attorney] (per 15 minutes)","15 min",250.00],
         ["Index & Paginate","Index & Paginate [Candidate Attorney] (per 15 minutes)","15 min",100.00],
@@ -211,8 +212,8 @@ process.on("unhandledRejection", (reason) => {
         ["Miscellaneous","Telephone call [Candidate Attorney] (per 5 min, rounded up)","5 min",25.00],
         ["Miscellaneous","Travelling Time [Attorney] (per minute)","minute",15.00],
         ["Miscellaneous","Travelling Disbursement (per km)","km",4.50],
-        ["Execution","Writ of Execution — drafting, issuing & execution (excl disbursements)","item",950.00],
-        ["Execution","Writ of Execution — re-issue","item",250.00],
+        ["Execution","Writ of Execution â drafting, issuing & execution (excl disbursements)","item",950.00],
+        ["Execution","Writ of Execution â re-issue","item",250.00],
       ];
       let i = 0;
       for (const [cat,item,unit,amt] of R) {
@@ -240,7 +241,7 @@ process.on("unhandledRejection", (reason) => {
   } catch (e) { console.error("billing init:", e.message); }
 })();
 
-// ── MIDDLEWARE ────────────────────────────────────────────────────
+// ââ MIDDLEWARE ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 app.use(helmet());
 app.use(express.json());
 app.use(cors({
@@ -258,10 +259,10 @@ app.use(cors({
 app.use("/api/", rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   max: 200,
-  message: { error: "Too many requests — try again shortly." }
+  message: { error: "Too many requests â try again shortly." }
 }));
 
-// ── API KEY AUTH ──────────────────────────────────────────────────
+// ââ API KEY AUTH ââââââââââââââââââââââââââââââââââââââââââââââââââ
 const API_KEY = process.env.API_KEY || "km-pipeline-secret-change-me";
 function auth(req, res, next) {
   const key = req.headers["x-api-key"] || req.query.api_key;
@@ -269,7 +270,7 @@ function auth(req, res, next) {
   next();
 }
 
-// Attorney-only guard — verifies the acting user's role in the DB.
+// Attorney-only guard â verifies the acting user's role in the DB.
 // Client sends x-user-id (obtained at PIN login). Rates & finance are gated here.
 async function requireAttorney(req, res, next) {
   try {
@@ -282,7 +283,7 @@ async function requireAttorney(req, res, next) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 }
 
-// ── EMAIL (Resend) — used for attorney alerts and client court reminders ──
+// ââ EMAIL (Resend) â used for attorney alerts and client court reminders ââ
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || "kmalale@malaleinc.co.za";
 const MAIL_FROM    = process.env.NOTIFY_FROM  || "K Malale Attorneys <onboarding@resend.dev>";
 async function sendEmail(subject, html, to) {
@@ -305,18 +306,18 @@ function emailShell(title, bodyHtml) {
       ${bodyHtml}
     </div>
     <div style="background:#FAF7F2;padding:14px 20px;font-size:12px;color:#8a827a">
-      K Malale Attorneys Inc · Office 10, Emerald Building, 6 Morgan Street, Tzaneen 0850<br>
-      072 591 3980 · 082 613 2230 · kmalale@malaleinc.co.za · www.malaleinc.co.za
+      K Malale Attorneys Inc Â· Office 10, Emerald Building, 6 Morgan Street, Tzaneen 0850<br>
+      072 591 3980 Â· 082 613 2230 Â· kmalale@malaleinc.co.za Â· www.malaleinc.co.za
     </div>
   </div>`;
 }
 
-// ── HEALTH ────────────────────────────────────────────────────────
+// ââ HEALTH ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 app.get("/health", (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
 
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  USERS & AUTH  (attorney-managed)
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 // helper: derive initials from a name
 function initialsOf(name){
@@ -325,7 +326,7 @@ function initialsOf(name){
 }
 const USER_COLORS = ["#9A7B4F","#378ADD","#1D9E75","#BA7517","#534AB7","#993C1D","#639922"];
 
-// POST /api/auth/login {pin} — server-side PIN check, never ships PINs to client
+// POST /api/auth/login {pin} â server-side PIN check, never ships PINs to client
 app.post("/api/auth/login", auth, async (req, res) => {
   try {
     const pin = (req.body && req.body.pin) || "";
@@ -339,7 +340,7 @@ app.post("/api/auth/login", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/users — list (never returns PINs)
+// GET /api/users â list (never returns PINs)
 app.get("/api/users", auth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -349,7 +350,7 @@ app.get("/api/users", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/users — create {name, role, pin, color?}
+// POST /api/users â create {name, role, pin, color?}
 app.post("/api/users", auth, async (req, res) => {
   try {
     const d = req.body || {};
@@ -368,7 +369,7 @@ app.post("/api/users", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/users/:id — update {name?, role?, pin?, color?}
+// PATCH /api/users/:id â update {name?, role?, pin?, color?}
 app.patch("/api/users/:id", auth, async (req, res) => {
   try {
     const d = req.body || {};
@@ -403,7 +404,7 @@ app.patch("/api/users/:id", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// DELETE /api/users/:id — cannot remove the last attorney
+// DELETE /api/users/:id â cannot remove the last attorney
 app.delete("/api/users/:id", auth, async (req, res) => {
   try {
     const cur = await pool.query("SELECT role FROM users WHERE id = $1", [req.params.id]);
@@ -417,11 +418,11 @@ app.delete("/api/users/:id", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  MATTERS
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// GET /api/matters — list all (with notes embedded)
+// GET /api/matters â list all (with notes embedded)
 app.get("/api/matters", auth, async (req, res) => {
   try {
     const { stage, search, limit = 200 } = req.query;
@@ -446,7 +447,7 @@ app.get("/api/matters", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/matters/:id — single matter with notes
+// GET /api/matters/:id â single matter with notes
 app.get("/api/matters/:id", auth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -460,7 +461,7 @@ app.get("/api/matters/:id", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/matters — create new matter
+// POST /api/matters â create new matter
 app.post("/api/matters", auth, async (req, res) => {
   try {
     const d = req.body;
@@ -481,7 +482,7 @@ app.post("/api/matters", auth, async (req, res) => {
       d.first_name || d.firstName, d.last_name || d.lastName,
       d.phone, d.email || null, d.town || null, d.id_number || d.idNumber || null,
       d.matter_type || d.matterType, d.urgency, d.summary,
-      d.consult_type || d.consultType || "In-person · Tzaneen",
+      d.consult_type || d.consultType || "In-person Â· Tzaneen",
       d.preferred_date || d.preferredDate || null,
       d.alt_date || d.altDate || null,
       d.time_slot || d.timeSlot || null,
@@ -503,11 +504,11 @@ app.post("/api/matters", auth, async (req, res) => {
       const m = rows[0];
       const urgent = (m.urgency||"").toLowerCase().includes("urgent");
       sendEmail(
-        `${urgent?"🔴 URGENT — ":""}New inquiry — ${m.first_name} ${m.last_name||""}`,
+        `${urgent?"ð´ URGENT â ":""}New inquiry â ${m.first_name} ${m.last_name||""}`,
         `<div style="font-family:sans-serif">
           <h2 style="color:#9A7B4F">New Client Inquiry</h2>
           <p><strong>${m.first_name} ${m.last_name||""}</strong> (${m.ref})</p>
-          <p>Matter: ${m.matter_type||"—"}<br>Phone: ${m.phone||"—"}<br>Email: ${m.email||"—"}<br>Urgency: ${m.urgency||"—"}</p>
+          <p>Matter: ${m.matter_type||"â"}<br>Phone: ${m.phone||"â"}<br>Email: ${m.email||"â"}<br>Urgency: ${m.urgency||"â"}</p>
           <p>${m.summary||""}</p>
           <p style="color:#888;font-size:12px">Received ${new Date().toLocaleString("en-ZA")}</p>
         </div>`
@@ -517,7 +518,7 @@ app.post("/api/matters", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/matters/:id — update any fields
+// PATCH /api/matters/:id â update any fields
 app.patch("/api/matters/:id", auth, async (req, res) => {
   try {
     const allowed = [
@@ -527,7 +528,7 @@ app.patch("/api/matters/:id", auth, async (req, res) => {
     ];
     const d = req.body;
     const sets = [], params = [];
-    // Normalise camelCase → snake_case
+    // Normalise camelCase â snake_case
     const toSnake = k => k.replace(/([A-Z])/g, "_$1").toLowerCase();
     Object.entries(d).forEach(([k, v]) => {
       const col = toSnake(k);
@@ -548,11 +549,11 @@ app.patch("/api/matters/:id", auth, async (req, res) => {
     if (Object.keys(d).map(k=>k.replace(/([A-Z])/g,"_$1").toLowerCase()).includes("stage")) {
       const m = rows[0];
       sendEmail(
-        `Matter status changed — ${m.first_name} ${m.last_name||""}`,
+        `Matter status changed â ${m.first_name} ${m.last_name||""}`,
         `<div style="font-family:sans-serif">
-          <h2 style="color:#9A7B4F">K Malale Attorneys — Pipeline Update</h2>
+          <h2 style="color:#9A7B4F">K Malale Attorneys â Pipeline Update</h2>
           <p><strong>${m.first_name} ${m.last_name||""}</strong> (${m.ref}) moved to stage: <strong>${m.stage}</strong></p>
-          <p>Matter type: ${m.matter_type||"—"}<br>Phone: ${m.phone||"—"}<br>Urgency: ${m.urgency||"—"}</p>
+          <p>Matter type: ${m.matter_type||"â"}<br>Phone: ${m.phone||"â"}<br>Urgency: ${m.urgency||"â"}</p>
           <p style="color:#888;font-size:12px">Logged ${new Date().toLocaleString("en-ZA")}</p>
         </div>`
       );
@@ -569,9 +570,9 @@ app.delete("/api/matters/:id", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 //  NOTES
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 // POST /api/matters/:id/notes
 app.post("/api/matters/:id/notes", auth, async (req, res) => {
@@ -595,11 +596,11 @@ app.delete("/api/notes/:id", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════════════════
-//  BILLING — rates (attorney-controlled) + entries + finance
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  BILLING â rates (attorney-controlled) + entries + finance
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// GET /api/rate-items — item list WITHOUT amounts (clerk can assign actions, not see money)
+// GET /api/rate-items â item list WITHOUT amounts (clerk can assign actions, not see money)
 app.get("/api/rate-items", auth, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -609,7 +610,7 @@ app.get("/api/rate-items", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/rates — FULL rate card incl amounts (ATTORNEY ONLY)
+// GET /api/rates â FULL rate card incl amounts (ATTORNEY ONLY)
 app.get("/api/rates", auth, requireAttorney, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -619,7 +620,7 @@ app.get("/api/rates", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/rates — add a custom rate (ATTORNEY ONLY)
+// POST /api/rates â add a custom rate (ATTORNEY ONLY)
 app.post("/api/rates", auth, requireAttorney, async (req, res) => {
   try {
     const d = req.body || {};
@@ -633,7 +634,7 @@ app.post("/api/rates", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/rates/:id — change an amount/label (ATTORNEY ONLY)
+// PATCH /api/rates/:id â change an amount/label (ATTORNEY ONLY)
 app.patch("/api/rates/:id", auth, requireAttorney, async (req, res) => {
   try {
     const d = req.body || {};
@@ -654,7 +655,7 @@ app.patch("/api/rates/:id", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// DELETE /api/rates/:id (ATTORNEY ONLY) — soft-deactivate to preserve history
+// DELETE /api/rates/:id (ATTORNEY ONLY) â soft-deactivate to preserve history
 app.delete("/api/rates/:id", auth, requireAttorney, async (req, res) => {
   try {
     await pool.query("UPDATE billing_rates SET active = false WHERE id = $1", [req.params.id]);
@@ -662,7 +663,7 @@ app.delete("/api/rates/:id", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST /api/matters/:id/billing — log a billable entry.
+// POST /api/matters/:id/billing â log a billable entry.
 //   Clerk CAN create this (assign the action); the rate (amount) is pulled
 //   server-side from the attorney-controlled table and cannot be overridden.
 app.post("/api/matters/:id/billing", auth, async (req, res) => {
@@ -674,7 +675,7 @@ app.post("/api/matters/:id/billing", auth, async (req, res) => {
     );
     if (!rr.length) return res.status(400).json({ error: "Unknown or inactive rate" });
     const rate = rr[0];
-    const unit_amount = Number(rate.amount);        // locked — never from client
+    const unit_amount = Number(rate.amount);        // locked â never from client
     const amount = Math.round(unit_amount * qty * 100) / 100;
     const { rows } = await pool.query(
       `INSERT INTO billing_entries
@@ -687,7 +688,7 @@ app.post("/api/matters/:id/billing", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/matters/:id/billing — ledger + total for one file (ATTORNEY ONLY)
+// GET /api/matters/:id/billing â ledger + total for one file (ATTORNEY ONLY)
 app.get("/api/matters/:id/billing", auth, requireAttorney, async (req, res) => {
   try {
     const { rows } = await pool.query(
@@ -707,7 +708,7 @@ app.delete("/api/billing/:id", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// PATCH /api/billing/:id — mark billed/unbilled or adjust qty (ATTORNEY ONLY)
+// PATCH /api/billing/:id â mark billed/unbilled or adjust qty (ATTORNEY ONLY)
 app.patch("/api/billing/:id", auth, requireAttorney, async (req, res) => {
   try {
     const d = req.body || {};
@@ -721,7 +722,7 @@ app.patch("/api/billing/:id", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/finance — totals per matter + grand totals (ATTORNEY ONLY)
+// GET /api/finance â totals per matter + grand totals (ATTORNEY ONLY)
 app.get("/api/finance", auth, requireAttorney, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -738,10 +739,10 @@ app.get("/api/finance", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════════════════
-//  COURT-DATE REMINDERS — email the client 2 days before, with progress
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  COURT-DATE REMINDERS â email the client 2 days before, with progress
 //  Called daily by Vercel Cron (see vercel.json). Idempotent per date.
-// ══════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 async function runReminders() {
   // matters with a court date exactly 2 days away, not yet reminded for it
   const { rows } = await pool.query(`
@@ -763,17 +764,17 @@ async function runReminders() {
         <p>Dear ${m.first_name || "Client"},</p>
         <p>This is a friendly reminder from K Malale Attorneys that your <strong>${label}</strong> is scheduled for:</p>
         <p style="font-size:16px;color:#0d0d0d;background:#FAEEDA;border-left:4px solid #9A7B4F;padding:10px 14px;border-radius:4px"><strong>${when}</strong></p>
-        <p><strong>Matter reference:</strong> ${m.ref || m.id}<br><strong>Matter type:</strong> ${m.matter_type || "—"}</p>
+        <p><strong>Matter reference:</strong> ${m.ref || m.id}<br><strong>Matter type:</strong> ${m.matter_type || "â"}</p>
         ${m.last_note ? `<p><strong>Latest progress on your case:</strong><br>${m.last_note}</p>` : ""}
         <p>Please ensure you are available and have any required documents ready. If you have questions, reply to this email or call us on 082 613 2230.</p>
         <p>Kind regards,<br><strong>K Malale Attorneys Inc</strong></p>`;
-      await sendEmail(`Reminder: your ${label} on ${when}`, emailShell("Upcoming Court Date — 2 Days to Go", body), m.email);
+      await sendEmail(`Reminder: your ${label} on ${when}`, emailShell("Upcoming Court Date â 2 Days to Go", body), m.email);
       sent++;
     }
     // 2) Attorney copy
     await sendEmail(
-      `Court reminder sent: ${name} — ${when}`,
-      emailShell("Court date in 2 days", `<p><strong>${name}</strong> (${m.ref||m.id})<br>${label} on <strong>${when}</strong>.<br>Client ${m.email?("notified at "+m.email):"has no email on file — please phone "+(m.phone||"")}.</p>`),
+      `Court reminder sent: ${name} â ${when}`,
+      emailShell("Court date in 2 days", `<p><strong>${name}</strong> (${m.ref||m.id})<br>${label} on <strong>${when}</strong>.<br>Client ${m.email?("notified at "+m.email):"has no email on file â please phone "+(m.phone||"")}.</p>`),
       NOTIFY_EMAIL
     );
     await pool.query("UPDATE matters SET reminder_sent_for = court_date WHERE id = $1", [m.id]);
@@ -781,7 +782,7 @@ async function runReminders() {
   return { checked: rows.length, emailed: sent };
 }
 
-// GET /api/cron/reminders — Vercel Cron hits this daily.
+// GET /api/cron/reminders â Vercel Cron hits this daily.
 // Auth: Vercel sends "Authorization: Bearer <CRON_SECRET>"; also accepts the API key for manual runs.
 app.get("/api/cron/reminders", async (req, res) => {
   try {
@@ -795,7 +796,7 @@ app.get("/api/cron/reminders", async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// GET /api/upcoming — court dates in the next 14 days (for the dashboard)
+// GET /api/upcoming â court dates in the next 14 days (for the dashboard)
 app.get("/api/upcoming", auth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -810,10 +811,10 @@ app.get("/api/upcoming", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════════════════
-//  RETAINERS (trust deposits) — attorney-only money side
-// ══════════════════════════════════════════════════════════════════
-// GET /api/matters/:id/retainer — payments + used (from billing) + balance
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  RETAINERS (trust deposits) â attorney-only money side
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// GET /api/matters/:id/retainer â payments + used (from billing) + balance
 app.get("/api/matters/:id/retainer", auth, requireAttorney, async (req, res) => {
   try {
     const pays = await pool.query("SELECT * FROM retainer_payments WHERE matter_id=$1 ORDER BY received_at ASC", [req.params.id]);
@@ -825,7 +826,7 @@ app.get("/api/matters/:id/retainer", auth, requireAttorney, async (req, res) => 
     res.json({ data: pays.rows, paid, used, balance: paid-used, target });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
-// POST /api/matters/:id/retainer — record a deposit (attorney)
+// POST /api/matters/:id/retainer â record a deposit (attorney)
 app.post("/api/matters/:id/retainer", auth, requireAttorney, async (req, res) => {
   try {
     const d = req.body || {};
@@ -842,7 +843,7 @@ app.delete("/api/retainer/:id", auth, requireAttorney, async (req, res) => {
   try { await pool.query("DELETE FROM retainer_payments WHERE id=$1", [req.params.id]); res.json({ deleted: req.params.id }); }
   catch (e) { res.status(500).json({ error: e.message }); }
 });
-// GET /api/retainers — low-balance watch (attorney): files where balance < 25% of target (or <= 0)
+// GET /api/retainers â low-balance watch (attorney): files where balance < 25% of target (or <= 0)
 app.get("/api/retainers", auth, requireAttorney, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -858,10 +859,10 @@ app.get("/api/retainers", auth, requireAttorney, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ══════════════════════════════════════════════════════════════════
-//  CALENDAR EVENTS (appointments / deadlines) — both roles may schedule
-// ══════════════════════════════════════════════════════════════════
-// ── iCalendar FEED — subscribe once, phone calendar auto-updates ──
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  CALENDAR EVENTS (appointments / deadlines) â both roles may schedule
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ââ iCalendar FEED â subscribe once, phone calendar auto-updates ââ
 // webcal://<host>/api/calendar.ics?key=<API_KEY>  (token in URL; calendar apps can't send headers)
 function icsEsc(s){ return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n'); }
 function icsDate(d){ const x=new Date(d); return x.getUTCFullYear()+String(x.getUTCMonth()+1).padStart(2,'0')+String(x.getUTCDate()).padStart(2,'0'); }
@@ -883,15 +884,15 @@ app.get("/api/calendar.ics", async (req, res) => {
     const ms = await pool.query("SELECT id, ref, first_name, last_name, matter_type, stage, court_date, court_label, next_action, next_action_due, preferred_date FROM matters WHERE stage <> 'closed'");
     ms.rows.forEach(m=>{
       const nm=((m.first_name||'')+' '+(m.last_name||'')).trim();
-      if(m.court_date) events.push({uid:'court'+m.id,date:m.court_date,summary:(m.court_label||'Court')+' — '+nm,desc:'Court date · '+(m.ref||m.id)+' · '+(m.matter_type||''),type:'court',alarm:true});
-      if(m.next_action_due) events.push({uid:'due'+m.id,date:m.next_action_due,summary:'Due: '+((m.next_action||'action'))+' — '+nm,desc:'Action due · '+(m.ref||m.id),type:'due',alarm:true});
-      if(m.preferred_date && (m.stage==='inquiry'||m.stage==='booked')) events.push({uid:'cons'+m.id,date:m.preferred_date,summary:'Consultation — '+nm,desc:'Consultation · '+(m.ref||m.id),type:'consultation',alarm:true});
+      if(m.court_date) events.push({uid:'court'+m.id,date:m.court_date,summary:(m.court_label||'Court')+' â '+nm,desc:'Court date Â· '+(m.ref||m.id)+' Â· '+(m.matter_type||''),type:'court',alarm:true});
+      if(m.next_action_due) events.push({uid:'due'+m.id,date:m.next_action_due,summary:'Due: '+((m.next_action||'action'))+' â '+nm,desc:'Action due Â· '+(m.ref||m.id),type:'due',alarm:true});
+      if(m.preferred_date && (m.stage==='inquiry'||m.stage==='booked')) events.push({uid:'cons'+m.id,date:m.preferred_date,summary:'Consultation â '+nm,desc:'Consultation Â· '+(m.ref||m.id),type:'consultation',alarm:true});
     });
     const stamp = new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
-    let out = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//K Malale Attorneys//Pipeline//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:K Malale Attorneys — Matters','X-WR-TIMEZONE:Africa/Johannesburg'];
+    let out = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//K Malale Attorneys//Pipeline//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:K Malale Attorneys â Matters','X-WR-TIMEZONE:Africa/Johannesburg'];
     events.forEach(e=>{
       const start=icsDate(e.date);
-      const end=icsDate(new Date(new Date(e.date).getTime()+86400000)); // all-day → next day
+      const end=icsDate(new Date(new Date(e.date).getTime()+86400000)); // all-day â next day
       out.push('BEGIN:VEVENT');
       out.push('UID:'+e.uid+'@malaleinc.co.za');
       out.push('DTSTAMP:'+stamp);
@@ -939,7 +940,7 @@ app.delete("/api/calendar/:id", auth, async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── STATS endpoint ────────────────────────────────────────────────
+// ââ STATS endpoint ââââââââââââââââââââââââââââââââââââââââââââââââ
 app.get("/api/stats", auth, async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -957,7 +958,7 @@ app.get("/api/stats", auth, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── CLIENT ERROR INTAKE + LOG VIEWING ─────────────────────────────
+// ââ CLIENT ERROR INTAKE + LOG VIEWING âââââââââââââââââââââââââââââ
 // The website posts any exception it catches to /api/errors (api-key
 // protected). The attorney can read the log as JSON, download it as a
 // plain-text notes file, or clear it.
@@ -1000,7 +1001,7 @@ app.get("/api/errors.txt", auth, requireAttorney, async (req, res) => {
       (r.url ? `  url: ${r.url}\n` : "") +
       (r.stack ? `  stack: ${String(r.stack).split("\n").slice(0, 6).join("\n         ")}\n` : "")
     );
-    const header = `K MALALE ATTORNEYS — ERROR & EVENT LOG\nGenerated: ${new Date().toISOString()}\nEntries: ${rows.length}\n${"=".repeat(60)}\n\n`;
+    const header = `K MALALE ATTORNEYS â ERROR & EVENT LOG\nGenerated: ${new Date().toISOString()}\nEntries: ${rows.length}\n${"=".repeat(60)}\n\n`;
     res.setHeader("Content-Type", "text/plain; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="km-error-log-${new Date().toISOString().slice(0,10)}.txt"`);
     res.send(header + lines.join("\n"));
@@ -1012,7 +1013,7 @@ app.delete("/api/errors", auth, requireAttorney, async (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// ── 404 + GLOBAL ERROR HANDLER (must stay last) ───────────────────
+// ââ 404 + GLOBAL ERROR HANDLER (must stay last) âââââââââââââââââââ
 app.use((req, res) => res.status(404).json({ error: "Not found", path: req.path }));
 app.use((err, req, res, next) => {
   logError({
